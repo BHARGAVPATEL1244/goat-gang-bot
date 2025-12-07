@@ -1,5 +1,5 @@
 services:
-  - type: worker
+  - type: web
     name: goat-gang-bot
     env: node
     buildCommand: npm install
