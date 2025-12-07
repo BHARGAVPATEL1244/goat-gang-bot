@@ -3,7 +3,7 @@
  */
 function validateApiKey(req, res, next) {
     const apiKey = req.headers['x-api-key'];
-    const validKey = process.env.API_KEY;
+    const validKey = process.env.BOT_API_KEY;
 
     if (!validKey) {
         console.error('API_KEY is not set in environment variables!');
