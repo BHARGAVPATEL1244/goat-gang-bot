@@ -93,6 +93,11 @@ app.use('/messages', authMiddleware, messageRoutes);
 app.use('/giveaways', authMiddleware, giveawayRoutes);
 app.use('/members', authMiddleware, require('./api/routes/members'));
 
+// UptimeRobot Heartbeat
+app.get('/', (req, res) => {
+    res.send('Goat Gang Bot is alive! 🐐');
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`API Server running on port ${PORT}`);
