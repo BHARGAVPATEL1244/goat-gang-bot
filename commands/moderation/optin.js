@@ -87,7 +87,7 @@ module.exports = {
 
             const finalMsg = `<:GG_Light_Dot:1244737191838748692> **Date of derby start:**\n${dateToday}\n` +
                 `<:GG_Light_Dot:1244737191838748692> **Type of derby:**\n\n` +
-                `<:GG_Light_Dot:1244737191838748692> **Neighborhood:**\n${role.toString()}\n` +
+                `<:GG_Light_Dot:1244737191838748692> **Neighborhood:**\n${role.name}\n` +
                 `<:GG_Light_Dot:1244737191838748692> **Members who opted-in this derby:**\n` +
                 (optIn.length > 0 ? optIn.map(name => `${name}`).join('\n') : 'None') + `\n` +
                 `<:GG_Light_Dot:1244737191838748692> **Members who opted-out of this derby:**\n` +
