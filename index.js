@@ -24,6 +24,10 @@ const client = new Client({
 
 app.set('client', client);
 
+// Enable Verbose Debugging for Troubleshooting
+client.on('debug', info => console.log(`[DEBUG] ${info}`));
+client.on('error', error => console.error(`[CLIENT ERROR] ${error.message}`));
+
 client.commands = new Collection();
 
 // Load Commands
