@@ -5,6 +5,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+const ADMIN_ID = '725759248444686357'; // User to notify on status change
+
 // --- Express API Setup ---
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -157,9 +159,19 @@ app.listen(PORT, () => {
 });
 
 // Login Bot
-client.once(Events.ClientReady, readyClient => {
+client.once(Events.ClientReady, async readyClient => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
     console.log(`Joined Guilds: ${readyClient.guilds.cache.map(g => `${g.name} (${g.id})`).join(', ')}`);
+
+    // Notify Admin: Online
+    try {
+        const adminUser = await client.users.fetch(ADMIN_ID);
+        if (adminUser) {
+            await adminUser.send(`🟢 **System Online**: Goat Gang Bot is now active and ready to serve! 🐐`);
+        }
+    } catch (err) {
+        console.error('[STATUS] Failed to send Online DM:', err);
+    }
 });
 
 if (!process.env.DISCORD_TOKEN) {
@@ -170,3 +182,20 @@ if (!process.env.DISCORD_TOKEN) {
         console.error('[LOGIN] CRITICAL: Failed to login:', err);
     });
 }
+
+// Graceful Shutdown: Notify Admin
+const handleShutdown = async (signal) => {
+    console.log(`[${signal}] Shutting down...`);
+    try {
+        const adminUser = await client.users.fetch(ADMIN_ID);
+        if (adminUser) {
+            await adminUser.send(`🔴 **System Offline**: Goat Gang Bot is shutting down (${signal})...`);
+        }
+    } catch (err) {
+        console.error('[STATUS] Failed to send Offline DM:', err);
+    }
+    process.exit(0);
+};
+
+process.on('SIGINT', () => handleShutdown('SIGINT'));
+process.on('SIGTERM', () => handleShutdown('SIGTERM'));
