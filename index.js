@@ -46,6 +46,15 @@ for (const folder of commandFolders) {
 
 // Auto-Register Commands on Startup
 (async () => {
+    if (!process.env.DISCORD_TOKEN) {
+        console.error('[DEPLOY] ERROR: DISCORD_TOKEN is missing in environment variables!');
+        return;
+    }
+    if (!process.env.CLIENT_ID) {
+        console.error('[DEPLOY] WARNING: CLIENT_ID is missing. Skipping command registration.');
+        return;
+    }
+
     try {
         const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
         const commandsData = client.commands.map(c => c.data.toJSON());
@@ -128,4 +137,11 @@ client.once(Events.ClientReady, readyClient => {
     console.log(`Joined Guilds: ${readyClient.guilds.cache.map(g => `${g.name} (${g.id})`).join(', ')}`);
 });
 
-client.login(process.env.DISCORD_TOKEN);
+if (!process.env.DISCORD_TOKEN) {
+    console.error('[LOGIN] ERROR: DISCORD_TOKEN is missing! Bot cannot login.');
+} else {
+    console.log('[LOGIN] Attempting to login...');
+    client.login(process.env.DISCORD_TOKEN).catch(err => {
+        console.error('[LOGIN] CRITICAL: Failed to login:', err);
+    });
+}
