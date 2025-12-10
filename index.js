@@ -153,6 +153,18 @@ app.get('/', (req, res) => {
     res.send('Goat Gang Bot is alive! 🐐');
 });
 
+// Debug Endpoint
+app.get('/debug', (req, res) => {
+    res.json({
+        node: process.version,
+        status: client.ws.status,
+        readyTimestamp: client.readyTimestamp,
+        user: client.user ? client.user.tag : null,
+        ping: client.ws.ping,
+        uptime: client.uptime
+    });
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`API Server running on port ${PORT}`);
