@@ -91,9 +91,30 @@ if (fs.existsSync(eventsPath)) {
     }
 }
 
+// Security: Auto-Leave Unauthorized Guilds
+client.on(Events.GuildCreate, async guild => {
+    if (process.env.GUILD_ID && guild.id !== process.env.GUILD_ID) {
+        console.warn(`[SECURITY] Leaving unauthorized guild: ${guild.name} (${guild.id})`);
+        try {
+            await guild.leave();
+        } catch (err) {
+            console.error(`[SECURITY] Failed to leave guild ${guild.id}:`, err);
+        }
+    }
+});
+
 // Handle Interactions (Fallback if not handled by events)
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isChatInputCommand()) return;
+
+    // Security: Restrict Commands to Main Guild
+    if (process.env.GUILD_ID && interaction.guildId !== process.env.GUILD_ID) {
+        await interaction.reply({
+            content: '⛔ This bot is private and restricted to the Goat Gang server only.',
+            ephemeral: true
+        });
+        return;
+    }
 
     const command = interaction.client.commands.get(interaction.commandName);
 
