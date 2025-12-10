@@ -43,7 +43,6 @@ for (const folder of commandFolders) {
         }
     }
 }
-}
 
 // Auto-Register Commands on Startup
 (async () => {
