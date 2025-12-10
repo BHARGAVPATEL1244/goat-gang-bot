@@ -43,6 +43,26 @@ for (const folder of commandFolders) {
         }
     }
 }
+}
+
+// Auto-Register Commands on Startup
+(async () => {
+    try {
+        const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+        const commandsData = client.commands.map(c => c.data.toJSON());
+
+        console.log(`[DEPLOY] Started refreshing ${commandsData.length} application (/) commands.`);
+
+        const data = await rest.put(
+            Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+            { body: commandsData },
+        );
+
+        console.log(`[DEPLOY] Successfully reloaded ${data.length} application (/) commands.`);
+    } catch (error) {
+        console.error('[DEPLOY] Error registering commands:', error);
+    }
+})();
 
 // Load Events
 const eventsPath = path.join(__dirname, 'events');
