@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits, REST, Routes } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, REST, Routes, MessageFlags } = require('discord.js');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -113,7 +113,7 @@ client.on(Events.InteractionCreate, async interaction => {
     if (process.env.GUILD_ID && interaction.guildId !== process.env.GUILD_ID) {
         await interaction.reply({
             content: '⛔ This bot is private and restricted to the Goat Gang server only.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -129,10 +129,15 @@ client.on(Events.InteractionCreate, async interaction => {
         await command.execute(interaction);
     } catch (error) {
         console.error(error);
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-        } else {
-            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        try {
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+            } else {
+                await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+            }
+        } catch (err) {
+            // Ignore "Unknown interaction" errors in the error handler itself
+            if (err.code !== 10062) console.error('Error sending error message:', err);
         }
     }
 });
