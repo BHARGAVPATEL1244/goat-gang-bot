@@ -184,6 +184,11 @@ client.once(Events.ClientReady, async readyClient => {
     } catch (err) {
         console.error('[STATUS] Failed to send Online DM:', err);
     }
+
+    // Start Feed Manager
+    const FeedManager = require('./services/FeedManager');
+    const feedManager = new FeedManager(client);
+    feedManager.start();
 });
 
 if (!process.env.DISCORD_TOKEN) {
