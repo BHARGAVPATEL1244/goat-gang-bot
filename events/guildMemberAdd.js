@@ -4,7 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 // Initialize Supabase (Use service role key if available for full access, or anon key)
 // Assuming ENV vars are set in bot process too
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
 
 let supabase = null;
 if (supabaseUrl && supabaseKey) {
