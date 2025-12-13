@@ -185,10 +185,22 @@ client.once(Events.ClientReady, async readyClient => {
         console.error('[STATUS] Failed to send Online DM:', err);
     }
 
-    // Start Feed Manager
+    // --- Services ---
     const FeedManager = require('./services/FeedManager');
     const feedManager = new FeedManager(client);
+
+    const SyncService = require('./services/SyncService');
+    const syncService = new SyncService(client);
+    const cron = require('node-cron');
+
+    // Start Services
     feedManager.start();
+
+    // Schedule Auto-Sync (Every Hour)
+    cron.schedule('0 * * * *', () => {
+        syncService.syncAll();
+    });
+    console.log('[Cron] Auto-Sync scheduled for every hour.');
 });
 
 if (!process.env.DISCORD_TOKEN) {
