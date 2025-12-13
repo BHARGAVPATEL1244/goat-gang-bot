@@ -127,3 +127,4 @@ module.exports = {
             console.error('[WELCOME] Error sending welcome message:', err);
         }
     },
+};
