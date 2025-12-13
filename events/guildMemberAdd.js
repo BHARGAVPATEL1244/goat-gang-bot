@@ -19,19 +19,31 @@ module.exports = {
         console.log(`[WELCOME] New member joined: ${member.user.tag} (${member.id})`);
 
         try {
-            try {
-                // 1. Fetch Config
-                if (!supabase) {
-                    console.error('[WELCOME] ❌ Supabase client is invalid/null. Check Environment Variables!');
-                    return;
-                }
+            // 1. Fetch Config
+            if (!supabase) {
+                console.error('[WELCOME] ❌ Supabase client is invalid/null. Check Environment Variables!');
+                return;
+            }
 
-                console.log(`[WELCOME] Fetching config for Guild ID: ${member.guild.id}`);
+            console.log(`[WELCOME] Fetching config for Guild ID: ${member.guild.id}`);
 
-                // Try to find config for this specific guild, or use 'default'
-                // In this specific setup, we might rely on the implementation plan's "default" logic or guild ID.
-                // Let's try to fetch by Guild ID first.
-                let { data: config, error } = await supabase
+            // Try to find config for this specific guild, or use 'default'
+            // In this specific setup, we might rely on the implementation plan's "default" logic or guild ID.
+            // Let's try to fetch by Guild ID first.
+            let { data: config, error } = await supabase
+                .from('welcome_configs')
+                .select('*')
+                .eq('guild_id', member.guild.id)
+                .single();
+
+            if (error) {
+                console.log(`[WELCOME] DB Error or No Config for specific guild: ${error.message}`);
+            }
+
+            if (error || !config) {
+                console.log('[WELCOME] Falling back to default config...');
+                // Fallback to 'default' if no specific guild config found (for single-tenant logic)
+                const { data: defaultConfig, error: defaultError } = await supabase
                     .from('welcome_configs')
                     .select('*')
                     .eq('guild_id', member.guild.id)
