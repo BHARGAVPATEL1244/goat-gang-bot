@@ -28,7 +28,11 @@ app.set('client', client);
 
 // Enable Verbose Debugging for Troubleshooting
 client.on('debug', info => console.log(`[DEBUG] ${info}`));
-client.on('error', error => console.error(`[CLIENT ERROR] ${error.message}`));
+client.on('error', error => {
+    // Ignore "Unknown interaction" errors
+    if (error.message && error.message.includes('Unknown interaction')) return;
+    console.error(`[CLIENT ERROR] ${error.message}`);
+});
 
 client.commands = new Collection();
 
