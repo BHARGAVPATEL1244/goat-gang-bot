@@ -78,7 +78,9 @@ class FeedManager {
                 // Reddit Subreddit Posts
                 let sub = feed.source.replace('r/', '');
                 const res = await fetch(`https://www.reddit.com/r/${sub}/new.json?limit=5`, {
-                    headers: { 'User-Agent': 'GoatGangBot/1.0' }
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (compatible; GoatGangBot/1.0; +https://www.google.com)'
+                    }
                 });
                 if (!res.ok) throw new Error(`Reddit API Error: ${res.status}`);
                 const json = await res.json();
@@ -99,7 +101,9 @@ class FeedManager {
                 if (match) postId = match[1];
 
                 const res = await fetch(`https://www.reddit.com/comments/${postId}.json?sort=new&limit=20`, {
-                    headers: { 'User-Agent': 'GoatGangBot/1.0' }
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (compatible; GoatGangBot/1.0; +https://www.google.com)'
+                    }
                 });
                 if (!res.ok) throw new Error(`Reddit API Error: ${res.status}`);
                 const json = await res.json();
