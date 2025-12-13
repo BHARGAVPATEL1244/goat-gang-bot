@@ -6,6 +6,16 @@ const { createClient } = require('@supabase/supabase-js');
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
 
+// DEBUG LOGGING
+console.log('[DEBUG-ENV] Checking Environment Variables:');
+console.log(`[DEBUG-ENV] NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL ? 'FOUND' : 'MISSING'}`);
+console.log(`[DEBUG-ENV] SUPABASE_URL: ${process.env.SUPABASE_URL ? 'FOUND' : 'MISSING'}`);
+console.log(`[DEBUG-ENV] SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE_KEY ? 'FOUND' : 'MISSING'}`);
+console.log(`[DEBUG-ENV] NEXT_PUBLIC_SUPABASE_ANON_KEY: ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'FOUND' : 'MISSING'}`);
+console.log(`[DEBUG-ENV] SUPABASE_KEY: ${process.env.SUPABASE_KEY ? 'FOUND' : 'MISSING'}`);
+console.log(`[DEBUG-ENV] Resolved URL: ${supabaseUrl ? 'VALID' : 'NULL'}`);
+console.log(`[DEBUG-ENV] Resolved Key: ${supabaseKey ? 'VALID' : 'NULL'}`);
+
 let supabase = null;
 if (supabaseUrl && supabaseKey) {
     supabase = createClient(supabaseUrl, supabaseKey);
