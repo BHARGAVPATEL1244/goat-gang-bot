@@ -6,7 +6,12 @@ const { createClient } = require('@supabase/supabase-js');
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+let supabase = null;
+if (supabaseUrl && supabaseKey) {
+    supabase = createClient(supabaseUrl, supabaseKey);
+} else {
+    console.warn('[WELCOME] Supabase keys missing. Welcome messages will not trigger.');
+}
 
 module.exports = {
     name: Events.GuildMemberAdd,
@@ -15,6 +20,7 @@ module.exports = {
 
         try {
             // 1. Fetch Config
+            if (!supabase) return;
             // Try to find config for this specific guild, or use 'default'
             // In this specific setup, we might rely on the implementation plan's "default" logic or guild ID.
             // Let's try to fetch by Guild ID first.

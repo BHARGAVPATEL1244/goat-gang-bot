@@ -3,7 +3,12 @@ const { createClient } = require('@supabase/supabase-js');
 const { EmbedBuilder } = require('discord.js');
 
 const parser = new Parser();
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+let supabase = null;
+if (process.env.NEXT_PUBLIC_SUPABASE_URL && (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)) {
+    supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+} else {
+    console.warn('[FEED MANAGER] Supabase keys missing! Feeds will not work.');
+}
 
 class FeedManager {
     constructor(client) {
@@ -23,6 +28,7 @@ class FeedManager {
     async checkFeeds() {
         try {
             // 1. Fetch Active Feeds
+            if (!supabase) return;
             const { data: feeds, error } = await supabase
                 .from('feed_configs')
                 .select('*')
