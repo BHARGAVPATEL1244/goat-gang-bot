@@ -45,10 +45,10 @@ class SyncService {
             // 2. Iterate and Sync
             for (const district of districts) {
                 await this.syncDistrict(district, globalCoLeaderId, globalElderId);
-                synced++;
+                totalSynced++;
             }
 
-            console.log(`[SyncService] Complete! Synced ${synced} hoods in ${(Date.now() - start) / 1000}s`);
+            console.log(`[SyncService] Complete! Synced ${totalSynced} hoods in ${(Date.now() - start) / 1000}s`);
 
         } catch (error) {
             console.error('[SyncService] Error:', error);
