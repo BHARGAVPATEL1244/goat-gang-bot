@@ -82,7 +82,12 @@ module.exports = {
 
             // 2. stickers (Discord Stickers)
             if (message.stickers.size > 0) {
-                const stickerUrls = message.stickers.map(s => s.url).join('\n');
+                console.log(`[ChatBridge] Found ${message.stickers.size} stickers.`);
+                const stickerUrls = message.stickers.map(s => {
+                    const url = s.url;
+                    console.log(`[ChatBridge] Sticker URL: ${url}`);
+                    return url;
+                }).join('\n');
                 finalContent = finalContent ? `${finalContent}\n${stickerUrls}` : stickerUrls;
             }
 
