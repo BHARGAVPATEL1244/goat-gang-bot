@@ -39,11 +39,25 @@ module.exports = {
         try {
             console.log(`[ChatBridge] Syncing message from ${message.author.username}...`);
 
-            // Handle Attachments (Images/GIFs)
-            let finalContent = message.content;
+            // Handle Attachments (Images/GIFs) & Embeds (Tenor/Giphy)
+            let finalContent = message.cleanContent || message.content; // Use cleanContent to resolve mentions to names
+
+            // 1. Attachments (Direct Uploads)
             if (message.attachments.size > 0) {
                 const attachmentUrls = message.attachments.map(a => a.url).join('\n');
                 finalContent = finalContent ? `${finalContent}\n${attachmentUrls}` : attachmentUrls;
+            }
+
+            // 2. Embeds (Tenor, Giphy, Links)
+            if (message.embeds.length > 0) {
+                const embedUrls = message.embeds
+                    .map(e => e.thumbnail?.url || e.image?.url || e.url) // Prefer thumbnail/image for GIFs
+                    .filter(url => url) // Remove nulls
+                    .join('\n');
+
+                if (embedUrls) {
+                    finalContent = finalContent ? `${finalContent}\n${embedUrls}` : embedUrls;
+                }
             }
 
             // 2. Insert into Supabase
