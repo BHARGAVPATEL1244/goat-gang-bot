@@ -39,6 +39,18 @@ module.exports = {
         try {
             console.log(`[ChatBridge] Syncing message from ${message.author.username}...`);
 
+            // Handle Async Embeds (Tenor/Giphy Unfurl)
+            // Discord takes a second to generate embeds for links. If we see a URL but no embed, wait and refetch.
+            if (/https?:\/\//.test(message.content) && message.embeds.length === 0 && message.attachments.size === 0) {
+                console.log('[ChatBridge] Link detected but no embed. Waiting 2.5s for unfurl...');
+                await new Promise(r => setTimeout(r, 2500)); // Wait 2.5 seconds
+                try {
+                    message = await message.fetch(); // Refetch updated message
+                } catch (e) {
+                    console.warn('[ChatBridge] Failed to refetch message:', e);
+                }
+            }
+
             // Handle Attachments (Images/GIFs) & Embeds (Tenor/Giphy)
             let finalContent = message.cleanContent || message.content; // Use cleanContent to resolve mentions to names
 
