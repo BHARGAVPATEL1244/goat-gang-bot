@@ -19,12 +19,26 @@ module.exports = {
     name: Events.MessageCreate,
     async execute(message) {
         // 1. Basic Checks
-        if (!supabase) return;
-        if (message.author.bot) return; // Ignore bots (including ourselves/webhooks)
-        if (!BRIDGE_CHANNEL_ID) return; // Feature not configured
+        if (!supabase) {
+            console.error('[ChatBridge] ERROR: Supabase Client not initialized! Check SUPABASE_SERVICE_ROLE_KEY.');
+            return;
+        }
+
+        // Debugging: Helps user verify they set the ID correctly
+        // console.log(`[ChatBridge] Message in ${message.channelId} (Bridge: ${BRIDGE_CHANNEL_ID})`);
+
+        if (message.author.bot) return; // Ignore bots
+
+        if (!BRIDGE_CHANNEL_ID) {
+            console.warn('[ChatBridge] BRIDGE_CHANNEL_ID is not set in .env!');
+            return;
+        }
+
         if (message.channelId !== BRIDGE_CHANNEL_ID) return; // Wrong channel
 
         try {
+            console.log(`[ChatBridge] Syncing message from ${message.author.username}...`);
+
             // 2. Insert into Supabase
             const { error } = await supabase
                 .from('chat_messages')
@@ -38,13 +52,13 @@ module.exports = {
                 });
 
             if (error) {
-                console.error('[ChatBridge] Failed to sync message:', error.message);
+                console.error('[ChatBridge] FAILED to insert:', error.message, error.details);
             } else {
-                // console.log(`[ChatBridge] Synced from ${message.author.username}: ${message.content.substring(0, 20)}...`);
+                console.log('[ChatBridge] Successfully synced.');
             }
 
         } catch (err) {
-            console.error('[ChatBridge] Error:', err);
+            console.error('[ChatBridge] Exception:', err);
         }
     },
 };
