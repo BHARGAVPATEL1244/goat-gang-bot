@@ -1,8 +1,7 @@
 const { Events } = require('discord.js');
 const { createClient } = require('@supabase/supabase-js');
 
-// Initialize Supabase (reusing logic from SyncService would be cleaner, but for Event handler simpler to init here or pass from client)
-// We will init here to be standalone.
+// Initialize Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
 
@@ -13,11 +12,12 @@ if (supabaseUrl && supabaseKey) {
     console.warn('[ChatBridge] Supabase keys missing. Bridge disabled.');
 }
 
-const BRIDGE_CHANNEL_ID = process.env.BRIDGE_CHANNEL_ID;
-
 module.exports = {
     name: Events.MessageCreate,
     async execute(message) {
+        // Read Env Var at Runtime to avoid loading issues
+        const BRIDGE_CHANNEL_ID = process.env.BRIDGE_CHANNEL_ID;
+
         // 1. Basic Checks
         if (!supabase) {
             console.error('[ChatBridge] ERROR: Supabase Client not initialized! Check SUPABASE_SERVICE_ROLE_KEY.');
@@ -39,11 +39,18 @@ module.exports = {
         try {
             console.log(`[ChatBridge] Syncing message from ${message.author.username}...`);
 
+            // Handle Attachments (Images/GIFs)
+            let finalContent = message.content;
+            if (message.attachments.size > 0) {
+                const attachmentUrls = message.attachments.map(a => a.url).join('\n');
+                finalContent = finalContent ? `${finalContent}\n${attachmentUrls}` : attachmentUrls;
+            }
+
             // 2. Insert into Supabase
             const { error } = await supabase
                 .from('chat_messages')
                 .insert({
-                    content: message.content,
+                    content: finalContent,
                     author_name: message.member ? (message.member.nickname || message.member.displayName) : message.author.username,
                     author_avatar: message.author.displayAvatarURL(),
                     source: 'discord',
