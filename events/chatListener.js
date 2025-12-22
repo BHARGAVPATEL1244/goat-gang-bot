@@ -52,7 +52,27 @@ module.exports = {
             }
 
             // Handle Attachments (Images/GIFs) & Embeds (Tenor/Giphy)
-            let finalContent = message.cleanContent || message.content; // Use cleanContent to resolve mentions to names
+            // CRITICAL: We use raw 'content' to preserve Custom Emoji IDs (<:name:id>), which cleanContent destroys.
+            let finalContent = message.content;
+
+            // Resolve User Mentions <@123> or <@!123>
+            finalContent = finalContent.replace(/<@!?(\d+)>/g, (match, id) => {
+                const member = message.guild.members.cache.get(id);
+                const user = message.mentions.users.get(id);
+                return member ? `@${member.displayName}` : (user ? `@${user.username}` : match);
+            });
+
+            // Resolve Channel Mentions <#123>
+            finalContent = finalContent.replace(/<#(\d+)>/g, (match, id) => {
+                const channel = message.guild.channels.cache.get(id);
+                return channel ? `#${channel.name}` : match;
+            });
+
+            // Resolve Role Mentions <@&123>
+            finalContent = finalContent.replace(/<@&(\d+)>/g, (match, id) => {
+                const role = message.guild.roles.cache.get(id);
+                return role ? `@${role.name}` : match;
+            });
 
             // 1. Attachments (Direct Uploads)
             if (message.attachments.size > 0) {
