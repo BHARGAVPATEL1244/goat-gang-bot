@@ -80,7 +80,13 @@ module.exports = {
                 finalContent = finalContent ? `${finalContent}\n${attachmentUrls}` : attachmentUrls;
             }
 
-            // 2. Embeds (Tenor, Giphy, Links)
+            // 2. stickers (Discord Stickers)
+            if (message.stickers.size > 0) {
+                const stickerUrls = message.stickers.map(s => s.url).join('\n');
+                finalContent = finalContent ? `${finalContent}\n${stickerUrls}` : stickerUrls;
+            }
+
+            // 3. Embeds (Tenor, Giphy, Links)
             if (message.embeds.length > 0) {
                 const embedUrls = message.embeds
                     .map(e => e.thumbnail?.url || e.image?.url || e.url) // Prefer thumbnail/image for GIFs
