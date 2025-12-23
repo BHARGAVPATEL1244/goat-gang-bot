@@ -24,7 +24,6 @@ module.exports = {
 
             if (nhRole) {
                 // --- AUDIT MODE ---
-                // Filter members who belong to the NH Role
                 const nhMembers = interaction.guild.members.cache.filter(m => m.roles.cache.has(nhRole.id));
 
                 const hasRole = [];
@@ -38,32 +37,57 @@ module.exports = {
                     }
                 });
 
-                // Helper to format list
-                const formatList = (members) => {
-                    if (members.length === 0) return 'None';
-                    const list = members.slice(0, 20).map(m => `• ${m.toString()}`).join('\n'); // Start with 20
-                    if (members.length > 20) return `${list}\n...and ${members.length - 20} others`;
-                    return list;
-                };
-
                 const embed = new EmbedBuilder()
-                    .setColor(role.color || '#0099ff')
+                    .setColor('#404040')
                     .setTitle(`Audit: ${role.name} in ${nhRole.name}`)
                     .setDescription(`Checking which members of **${nhRole.name}** have the **${role.name}** role.`)
-                    .addFields(
-                        {
-                            name: `✅ Has Role (${hasRole.length})`,
-                            value: formatList(hasRole),
-                            inline: true
-                        },
-                        {
-                            name: `❌ Missing Role (${missingRole.length})`,
-                            value: formatList(missingRole),
-                            inline: true
-                        }
-                    )
                     .setFooter({ text: `Total NH Members: ${nhMembers.size}` })
                     .setTimestamp();
+
+                // Helper to add fields safely (Discord 1024 char limit)
+                const addSafeFields = (label, members, emoji) => {
+                    if (members.length === 0) {
+                        embed.addFields({ name: `${emoji} ${label} (0)`, value: 'None', inline: false });
+                        return;
+                    }
+
+                    // Sort alphabetically
+                    members.sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+                    const allNames = members.map(m => `• ${m.toString()}`);
+                    let currentChunk = [];
+                    let currentLength = 0;
+                    let fieldIndex = 1;
+
+                    allNames.forEach((name) => {
+                        // +1 for the newline character
+                        if (currentLength + name.length + 1 > 1000) {
+                            // Flush chunk
+                            embed.addFields({
+                                name: `${emoji} ${label} (${members.length}) - Part ${fieldIndex}`,
+                                value: currentChunk.join('\n'),
+                                inline: true
+                            });
+                            currentChunk = [];
+                            currentLength = 0;
+                            fieldIndex++;
+                        }
+                        currentChunk.push(name);
+                        currentLength += name.length + 1;
+                    });
+
+                    // Flush remaining
+                    if (currentChunk.length > 0) {
+                        embed.addFields({
+                            name: fieldIndex > 1 ? `${emoji} ${label} (${members.length}) - Part ${fieldIndex}` : `${emoji} ${label} (${members.length})`,
+                            value: currentChunk.join('\n'),
+                            inline: true
+                        });
+                    }
+                };
+
+                addSafeFields('Has Role', hasRole, '✅');
+                addSafeFields('Missing Role', missingRole, '❌');
 
                 await interaction.editReply({ embeds: [embed] });
 
@@ -71,25 +95,22 @@ module.exports = {
                 // --- CLASSIC MODE ---
                 const membersWithRole = interaction.guild.members.cache.filter(member => member.roles.cache.has(role.id));
                 const count = membersWithRole.size;
+                const membersArray = Array.from(membersWithRole.values()).sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-                const MAX_DISPLAY = 40;
-                const membersArray = Array.from(membersWithRole.values());
+                // For Classic Mode, we use Description (4096 chars max)
+                // If it's HUGE, we might still clip, but 4096 is ~200 mentions.
 
-                let description = membersArray
-                    .slice(0, MAX_DISPLAY)
-                    .map(m => `• ${m.toString()} (${m.user.tag})`) // Mention + Tag
-                    .join('\n');
+                let description = membersArray.map(m => `• ${m.toString()} (${m.user.tag})`).join('\n');
 
-                if (count > MAX_DISPLAY) {
-                    description += `\n\n**...and ${count - MAX_DISPLAY} others.**`;
+                if (description.length > 4090) {
+                    description = description.substring(0, 4000) + `\n\n... and more (Discord Limit reached)`;
                 }
-
                 if (count === 0) {
                     description = "No members found with this role.";
                 }
 
                 const embed = new EmbedBuilder()
-                    .setColor(role.color || '#0099ff')
+                    .setColor('#404040')
                     .setTitle(`Members with role: ${role.name}`)
                     .setDescription(description)
                     .setFooter({ text: `Total: ${count} members` })
