@@ -200,10 +200,15 @@ client.once(Events.ClientReady, async readyClient => {
 
     const SyncService = require('./services/SyncService');
     const syncService = new SyncService(client);
+
+    const BumpManager = require('./services/BumpManager');
+    const bumpManager = new BumpManager(client);
+
     const cron = require('node-cron');
 
     // Start Services
     feedManager.start();
+    bumpManager.start();
 
     // Schedule Auto-Sync (Every Hour)
     cron.schedule('0 * * * *', () => {
